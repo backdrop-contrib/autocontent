@@ -1,0 +1,15 @@
+type = module
+name = Automatic Content
+description = Allows content to be created automatically, at defined intervals.
+backdrop = 1.x
+
+; Link to the module's configuration page.
+configure = admin/config/content/autocontent
+
+; List any dependencies here.
+dependencies[] = node
+
+; Find suggested packages and tags at: https://docs.backdropcms.org/documentation/module-packages-and-tags
+package = Content
+tags[] = Administration
+tags[] = Automation

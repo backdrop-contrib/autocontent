@@ -1,0 +1,166 @@
+<?php
+/**
+ * @file
+ * Allows content to be created automatically, at defined intervals.
+ */
+
+/**
+ * Implements hook_config_info().
+ */
+function autocontent_config_info() {
+  $prefixes['autocontent.item'] = array(
+    'name_key' => 'name',
+    'label_key' => 'label',
+    'group' => t('Automatic Content'),
+  );
+
+  $prefixes['autocontent.settings'] = array(
+    'label' => t('Automatic Content Settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function autocontent_menu() {
+  return array(
+    'admin/config/content/autocontent' => array(
+      'title' => 'Automatic Content',
+      'page callback' => 'autocontent_admin',
+      'access arguments' => array('administer autocontent'),
+      'file' => 'autocontent.admin.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+    'admin/config/content/autocontent/list' => array(
+      'title' => 'Automatic Content List',
+      'type' => MENU_LOCAL_TASK,
+    ),
+
+    'admin/config/content/autocontent/add' => array(
+      'title' => 'Add',
+      'description' => 'Add automatic content configuration',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('autocontent_configure_form'),
+      'access arguments' => array('administer autocontent'),
+      'file' => 'autocontent.admin.inc',
+      'type' => MENU_LOCAL_ACTION,
+    ),
+    'admin/config/content/autocontent/%autocontent/configure' => array(
+      'title' => 'Configure',
+      'description' => 'Configure automatic content configuration',
+      'page callback' => 'backdrop_get_form',
+      'page arguments' => array('autocontent_configure_form', 4),
+      'access arguments' => array('administer autocontent'),
+      'file' => 'autocontent.admin.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+    'admin/config/content/autocontent/%autocontent/delete' => array(
+      'title' => 'Delete',
+      'description' => 'Delete automatic content configuration',
+      'page callback' => 'autocontent_admin',
+      'access arguments' => array('administer autocontent'),
+      'file' => 'autocontent.admin.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+    'admin/config/content/autocontent/%autocontent/enable' => array(
+      'title' => 'Enable',
+      'description' => 'Enable automatic content configuration',
+      'page callback' => 'autocontent_admin',
+      'access arguments' => array('administer autocontent'),
+      'file' => 'autocontent.admin.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+    'admin/config/content/autocontent/%autocontent/disable' => array(
+      'title' => 'Disable',
+      'description' => 'Disable automatic content configuration',
+      'page callback' => 'autocontent_admin',
+      'access arguments' => array('administer autocontent'),
+      'file' => 'autocontent.admin.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function autocontent_permission() {
+  return array(
+    'administer autocontent' => array(
+      'title' => t('Administer autocontent'),
+    ),
+  );
+}
+
+/**
+ * Autoloader: retreives config data for each item.
+ *   @param (string) $item_name
+ *     Machine name for the autocontent item.
+ */
+function autocontent_load($name = FALSE) {
+  if ($name) {
+    $config = config('autocontent.item.' . $name);
+    return $config->get();
+  }
+  
+  return FALSE;
+}
+
+
+/******************************************************************************
+** Helper functions
+*******************************************************************************/
+
+/**
+ * Helper function: Returns available intervals.
+ */
+function autocontent_get_intervals($seconds = FALSE) {
+  $intervals = array(
+    '86400' => t('Daily'),
+    '604800' => t('Weekly'),
+  );
+  backdrop_alter('autocontent_intervals', $intervals);
+
+  if ($seconds) {
+    return $intervals[$seconds];
+  }
+
+  return $intervals;
+}
+
+/**
+ * Helper function: Returns available intervals.
+ */
+function autocontent_get_frequencies($frequency = FALSE) {
+  $frequencies = array(
+    '1' => t('Once'),
+    '2' => t('Twice'),
+  );
+  backdrop_alter('autocontent_intervals', $frequencies);
+
+  if ($frequency) {
+    return $frequencies[$frequency];
+  }
+
+  return $frequencies;
+}
+
+/**
+ * Helper function: returns admin link for the requested op.
+ * 
+ * @param (string) $item_name
+ *   Machine name of the autocontent item.
+ * @param (string) $op
+ *   Machine name of the operaiton being performed.
+ */
+function _autocontent_admin_link($item_name = FALSE, $op = FALSE) {
+  if ($item_name && $op) {
+    $supported_ops = array('add', 'configure', 'delete', 'enable', 'disable', 'create');
+    if (in_array($op, $supported_ops)) {
+      return 'admin/config/content/autocontent/' . $item_name . '/' . $op;
+    }
+  }
+}
